@@ -142,7 +142,7 @@ h2{font:clamp(40px,5vw,64px)/.95 Archivo;letter-spacing:-.01em}
   <div class="nl">
     <a class="btn ghost" href="#how">How it works</a>
     <a class="btn ghost" href="#feed">Buybacks</a>
-    <a class="btn" id="xLink" href="#" target="_blank" rel="noopener">X</a>
+    <a class="btn" id="xLink" href="https://x.com/trybottomdotfun" target="_blank" rel="noopener">X</a>
     <a class="btn red" id="buyLink" href="#" target="_blank" rel="noopener">Buy</a>
   </div>
 </div></nav>
@@ -152,7 +152,7 @@ h2{font:clamp(40px,5vw,64px)/.95 Archivo;letter-spacing:-.01em}
     <div class="kick rv"><span class="dot" id="heroDot"></span><span id="heroKick">watching the market</span></div>
     <h1 class="rv">$BOTTOM</h1>
     <p class="lead rv">Every time the market <b>bleeds</b>, he buys himself back and burns it.</p>
-    <div class="ca rv"><code id="ca">contract address soon</code><button id="copy">Copy</button></div>
+    <div class="ca rv" id="caBox" style="display:none"><code id="ca"></code><button id="copy">Copy</button></div>
     <div class="acts rv">
       <a class="btn red" id="buyLink2" href="#" target="_blank" rel="noopener">Buy on pump.fun</a>
       <a class="btn" href="#market">Market now</a>
@@ -248,7 +248,7 @@ $("snd").onclick = () => { const v = $("vid"); v.muted = !v.muted; if (!v.muted)
 
 // copy CA
 $("copy").onclick = async () => {
-  const t = $("ca").textContent; if (!t || t.includes("soon")) return;
+  const t = $("ca").textContent; if (!t) return;
   try { await navigator.clipboard.writeText(t); $("copy").textContent = "Copied"; setTimeout(() => $("copy").textContent = "Copy", 1400); } catch {}
 };
 
@@ -273,7 +273,7 @@ function drawTiers(tiers) {
 
 function render(s) {
   const c = s.config || {};
-  if (c.mint) $("ca").textContent = c.mint;
+  if (c.mint) { $("ca").textContent = c.mint; $("caBox").style.display = ""; }
   const pump = c.pump || (c.mint ? "https://pump.fun/coin/" + c.mint : "#");
   $("buyLink").href = $("buyLink2").href = pump;
   if (c.x) $("xLink").href = c.x;
