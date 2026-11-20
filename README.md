@@ -1,5 +1,7 @@
 # $BOTTOM — site + buyback bot
 
+Live: https://trybottom.fun
+
 Two parts:
 - **site/** — the website (Vercel)
 - **bot/**  — the buyback bot (Railway)
