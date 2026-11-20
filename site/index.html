@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>$BOTTOM — buys back when the market bleeds</title>
+<meta name="description" content="$BOTTOM buys itself back every time the market dumps. Creator fees, auto buyback, burn.">
+<meta property="og:title" content="$BOTTOM">
+<meta property="og:description" content="Buys back every time the market bleeds.">
+<meta property="og:image" content="assets/banner.jpg">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="assets/avatar.jpg">
+<style>
+@font-face{font-family:Archivo;src:url(assets/ArchivoBlack-Regular.ttf);font-display:swap}
+@font-face{font-family:Inter;src:url(assets/InterTight-500.ttf);font-weight:500;font-display:swap}
+@font-face{font-family:Inter;src:url(assets/InterTight-600.ttf);font-weight:600;font-display:swap}
+:root{--paper:#f4ecde;--paper2:#ece1cf;--ink:#151313;--red:#e21c1f;--green:#2ea24a;--muted:#6f655b}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{background:var(--paper);color:var(--ink);font:500 17px/1.5 Inter,system-ui,sans-serif;-webkit-font-smoothing:antialiased;overflow-x:hidden}
+a{color:inherit;text-decoration:none}
+/* paper grain over everything */
+body:after{content:"";position:fixed;inset:-50%;pointer-events:none;z-index:50;opacity:.16;
+ background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .1 0 0 0 0 .08 0 0 0 0 .06 0 0 0 .55 0'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)'/%3E%3C/svg%3E");
+ animation:grain 1s steps(4) infinite}
+@keyframes grain{0%{transform:translate(0,0)}25%{transform:translate(-3%,2%)}50%{transform:translate(2%,-3%)}75%{transform:translate(-2%,-1%)}}
+.wrap{max-width:1180px;margin:0 auto;padding:0 28px}
+.wrap>*,.mk>*{min-width:0}
+
+/* nav */
+nav{position:fixed;top:0;left:0;right:0;z-index:40;transition:background .3s,border-color .3s;border-bottom:2px solid transparent}
+nav.s{background:rgba(244,236,222,.88);backdrop-filter:blur(10px);border-color:var(--ink)}
+nav .wrap{display:flex;align-items:center;justify-content:space-between;height:70px}
+.logo{display:flex;align-items:center;gap:12px;font:22px Archivo}
+.logo img{width:40px;height:40px;border-radius:50%;border:2.5px solid var(--ink)}
+.nl{display:flex;gap:10px;align-items:center}
+.btn{display:inline-flex;align-items:center;gap:8px;height:46px;padding:0 20px;border:2.5px solid var(--ink);border-radius:12px;font-weight:600;background:var(--paper);box-shadow:4px 4px 0 var(--ink);transition:transform .15s,box-shadow .15s;cursor:pointer;font-size:16px;color:var(--ink)}
+.btn:hover{transform:translate(-2px,-2px);box-shadow:6px 6px 0 var(--ink)}
+.btn:active{transform:translate(3px,3px);box-shadow:1px 1px 0 var(--ink)}
+.btn.red{background:var(--red);color:var(--paper)}
+.btn.ghost{box-shadow:none;border-color:transparent;background:none}
+.btn.ghost:hover{transform:none;text-decoration:underline}
+
+/* hero */
+.hero{padding:130px 0 70px;position:relative}
+.hero .wrap{display:grid;grid-template-columns:1fr 1.25fr;gap:56px;align-items:center}
+.kick{display:inline-flex;align-items:center;gap:10px;font-weight:600;font-size:14px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+.dot{width:10px;height:10px;border-radius:50%;background:var(--red);box-shadow:0 0 0 0 rgba(226,28,31,.6);animation:pulse 1.6s infinite}
+.dot.g{background:var(--green);animation:none}
+@keyframes pulse{70%{box-shadow:0 0 0 10px rgba(226,28,31,0)}100%{box-shadow:0 0 0 0 rgba(226,28,31,0)}}
+h1{font:clamp(60px,8.4vw,116px)/.9 Archivo;letter-spacing:-.02em;margin:18px 0 22px}
+h1 span{display:inline-block}
+.lead{font-size:22px;line-height:1.35;max-width:440px}
+.lead b{color:var(--red);font-weight:600}
+.ca{margin-top:30px;display:flex;align-items:center;gap:10px;max-width:460px;border:2.5px solid var(--ink);border-radius:12px;padding:6px 6px 6px 16px;background:#fbf6ec}
+.ca code{font:600 14px ui-monospace,Menlo,monospace;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1;min-width:0;color:var(--muted)}
+.ca button{height:36px;padding:0 14px;border-radius:8px;border:0;background:var(--ink);color:var(--paper);font:600 14px Inter;cursor:pointer}
+.acts{display:flex;gap:14px;margin-top:22px;flex-wrap:wrap}
+.tv{position:relative;border:3px solid var(--ink);border-radius:22px;overflow:hidden;box-shadow:10px 10px 0 var(--ink);background:var(--ink);aspect-ratio:16/9;transform:rotate(1.2deg)}
+.tv video{width:100%;height:100%;object-fit:cover;display:block}
+.snd{position:absolute;right:14px;bottom:14px;height:38px;padding:0 14px;border-radius:10px;border:2.5px solid var(--ink);background:var(--paper);font:600 14px Inter;cursor:pointer}
+
+/* reveal on scroll */
+.rv{opacity:0;transform:translateY(26px);filter:blur(6px);transition:opacity .9s cubic-bezier(.2,.7,.2,1),transform .9s cubic-bezier(.2,.7,.2,1),filter .9s}
+.rv.in{opacity:1;transform:none;filter:none}
+
+/* sections */
+section{padding:90px 0}
+.sh{display:flex;justify-content:space-between;align-items:end;gap:20px;margin-bottom:34px;flex-wrap:wrap}
+h2{font:clamp(40px,5vw,64px)/.95 Archivo;letter-spacing:-.01em}
+.sub{color:var(--muted);max-width:420px}
+
+/* market */
+.mk{border:3px solid var(--ink);border-radius:24px;background:#fbf6ec;box-shadow:8px 8px 0 var(--ink);padding:34px;display:grid;grid-template-columns:1fr 1.3fr;gap:40px;align-items:center}
+.big{font:clamp(64px,8vw,104px)/1 Archivo;letter-spacing:-.02em;transition:color .4s}
+.big.r{color:var(--red)}.big.g{color:var(--green)}
+.cap{font-size:14px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+.mood{font-size:22px;margin-top:10px;font-weight:600}
+.meter{position:relative;height:74px;margin-top:6px}
+.bar{position:absolute;left:0;right:0;top:22px;height:22px;border:2.5px solid var(--ink);border-radius:12px;overflow:hidden;background:var(--paper)}
+.fill{position:absolute;right:0;top:0;bottom:0;width:0;background:var(--red);transition:width 1.2s cubic-bezier(.2,.8,.2,1);border-left:2.5px solid var(--ink)}
+.tk{position:absolute;top:0;transform:translateX(-50%);font:600 13px Inter;color:var(--muted);text-align:center}
+.tk:after{content:"";display:block;width:2.5px;height:50px;background:var(--ink);margin:4px auto 0;opacity:.85}
+.tk.hit{color:var(--red)}
+.mrow{display:flex;gap:28px;margin-top:20px;flex-wrap:wrap;color:var(--muted);font-size:15px}
+.mrow b{color:var(--ink);font-weight:600}
+
+/* how */
+.how{display:grid;grid-template-columns:repeat(3,1fr);gap:22px}
+.step{border:3px solid var(--ink);border-radius:22px;padding:28px;background:#fbf6ec;position:relative;min-height:270px}
+.step .n{font:15px Archivo;color:var(--muted)}
+.step h3{font:30px/1 Archivo;margin:18px 0 10px}
+.step p{color:var(--muted)}
+.step svg{position:absolute;right:24px;bottom:24px;width:64px;height:64px}
+.step:nth-child(2){transform:translateY(18px)}.step:nth-child(3){transform:translateY(36px)}
+
+/* tiers */
+.tiers{display:grid;grid-template-columns:repeat(3,1fr);gap:0;border:3px solid var(--ink);border-radius:22px;overflow:hidden;box-shadow:8px 8px 0 var(--ink)}
+.tier{padding:34px 28px;border-right:3px solid var(--ink);background:#fbf6ec;position:relative;overflow:hidden}
+.tier:last-child{border:0;background:var(--red);color:var(--paper)}
+.tier .d{font:clamp(48px,6vw,76px)/1 Archivo}
+.tier .p{margin-top:12px;font-size:19px;font-weight:600}
+.tier .p small{display:block;font-weight:500;opacity:.7;font-size:15px}
+.tier .lvl{position:absolute;left:0;right:0;bottom:0;background:rgba(226,28,31,.12)}
+.tier:last-child .lvl{background:rgba(0,0,0,.12)}
+
+/* stats + feed */
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:22px;margin-bottom:26px}
+.st{border:3px solid var(--ink);border-radius:20px;padding:24px 26px;background:#fbf6ec}
+.st .v{font:clamp(36px,4vw,52px)/1 Archivo;margin-top:8px}
+.feed{border:3px solid var(--ink);border-radius:20px;overflow:hidden;background:#fbf6ec}
+.fr{display:grid;grid-template-columns:120px 110px 1fr auto;gap:18px;padding:18px 24px;border-top:2px solid rgba(21,19,19,.15);align-items:center;font-size:16px}
+.fr:first-child{border-top:0}
+.fr .t{color:var(--muted);font-size:14px}
+.fr .dp{font:20px Archivo;color:var(--red)}
+.fr a{font-weight:600;text-decoration:underline;text-underline-offset:3px}
+.fr .sim{font-size:12px;font-weight:600;border:2px solid var(--ink);border-radius:6px;padding:1px 6px;margin-left:8px;color:var(--muted)}
+.empty{padding:40px 24px;color:var(--muted);text-align:center}
+
+/* footer */
+.foot{border-top:3px solid var(--ink);margin-top:40px}
+.foot img{display:block;width:100%;height:auto;border-bottom:3px solid var(--ink)}
+.fb{display:flex;justify-content:space-between;align-items:center;padding:26px 0 40px;gap:20px;flex-wrap:wrap;color:var(--muted);font-size:14px}
+
+@media(max-width:900px){
+ .hero .wrap,.mk{grid-template-columns:1fr}
+ .how,.tiers,.stats{grid-template-columns:1fr}
+ .step:nth-child(n){transform:none}
+ .tier{border-right:0;border-bottom:3px solid var(--ink)}
+ .fr{grid-template-columns:1fr auto;}
+ .fr .t{grid-column:1/-1}
+ .nl .ghost{display:none}
+ .wrap{padding:0 20px}
+ .tv{transform:none;box-shadow:6px 6px 0 var(--ink)}
+}
+</style>
+</head>
+<body>
+
+<nav id="nav"><div class="wrap">
+  <a class="logo" href="#"><img src="assets/avatar.jpg" alt="">$BOTTOM</a>
+  <div class="nl">
+    <a class="btn ghost" href="#how">How it works</a>
+    <a class="btn ghost" href="#feed">Buybacks</a>
+    <a class="btn" id="xLink" href="#" target="_blank" rel="noopener">X</a>
+    <a class="btn red" id="buyLink" href="#" target="_blank" rel="noopener">Buy</a>
+  </div>
+</div></nav>
+
+<header class="hero"><div class="wrap">
+  <div>
+    <div class="kick rv"><span class="dot" id="heroDot"></span><span id="heroKick">watching the market</span></div>
+    <h1 class="rv">$BOTTOM</h1>
+    <p class="lead rv">Every time the market <b>bleeds</b>, he buys himself back and burns it.</p>
+    <div class="ca rv"><code id="ca">contract address soon</code><button id="copy">Copy</button></div>
+    <div class="acts rv">
+      <a class="btn red" id="buyLink2" href="#" target="_blank" rel="noopener">Buy on pump.fun</a>
+      <a class="btn" href="#market">Market now</a>
+    </div>
+  </div>
+  <div class="rv">
+    <div class="tv">
+      <video id="vid" src="assets/scene.mp4" poster="assets/poster.jpg" autoplay muted loop playsinline></video>
+      <button class="snd" id="snd">Sound on</button>
+    </div>
+  </div>
+</div></header>
+
+<section id="market"><div class="wrap">
+  <div class="sh rv"><h2>Market now</h2><p class="sub">The bot checks Bitcoin every minute. When it falls, $BOTTOM buys.</p></div>
+  <div class="mk rv">
+    <div>
+      <div class="cap">Bitcoin, last hour</div>
+      <div class="big" id="ch1h">—</div>
+      <div class="mood" id="mood">Loading…</div>
+    </div>
+    <div>
+      <div class="cap">Dip meter</div>
+      <div class="meter" id="meter">
+        <div class="bar"><div class="fill" id="fill"></div></div>
+      </div>
+      <div class="mrow">
+        <span>BTC <b id="px">—</b></span>
+        <span>24h <b id="ch24">—</b></span>
+        <span>Checked <b id="ago">—</b></span>
+      </div>
+    </div>
+  </div>
+</div></section>
+
+<section id="how"><div class="wrap">
+  <div class="sh rv"><h2>How it works</h2><p class="sub">No promises, no roadmap. One rule, done by a bot.</p></div>
+  <div class="how">
+    <div class="step rv">
+      <svg viewBox="0 0 72 72"><line x1="36" y1="4" x2="36" y2="68" stroke="#151313" stroke-width="4"/><rect x="22" y="16" width="28" height="40" rx="3" fill="#e21c1f" stroke="#151313" stroke-width="4"/></svg>
+      <div class="n">01</div><h3>Market dumps</h3><p>Bitcoin drops 1% or more in an hour. That's the signal.</p>
+    </div>
+    <div class="step rv">
+      <svg viewBox="0 0 72 72"><circle cx="36" cy="36" r="26" fill="#f4ecde" stroke="#151313" stroke-width="4"/><path d="M36 22v28M27 40l9 10 9-10" fill="none" stroke="#151313" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      <div class="n">02</div><h3>Fees get claimed</h3><p>The bot collects the coin's creator fees from pump.fun.</p>
+    </div>
+    <div class="step rv">
+      <svg viewBox="0 0 72 72"><path d="M36 6c4 14 20 20 20 38a20 20 0 0 1-40 0c0-10 6-14 8-22 4 6 6 8 8 8-2-10 0-18 4-24z" fill="#e21c1f" stroke="#151313" stroke-width="4" stroke-linejoin="round"/></svg>
+      <div class="n">03</div><h3>Buy &amp; burn</h3><p>It buys $BOTTOM with those fees and burns every token it bought.</p>
+    </div>
+  </div>
+</div></section>
+
+<section id="tiers"><div class="wrap">
+  <div class="sh rv"><h2>Bigger dip,<br>bigger buy</h2><p class="sub">Share of claimed fees the bot spends, by how hard Bitcoin fell in the last hour.</p></div>
+  <div class="tiers rv" id="tierBox"></div>
+</div></section>
+
+<section id="feed"><div class="wrap">
+  <div class="sh rv"><h2>Buybacks</h2><p class="sub">Every buy and burn, with the transaction.</p></div>
+  <div class="stats rv">
+    <div class="st"><div class="cap">Buybacks</div><div class="v" id="tB">0</div></div>
+    <div class="st"><div class="cap">SOL spent</div><div class="v" id="tS">0</div></div>
+    <div class="st"><div class="cap">$BOTTOM burned</div><div class="v" id="tT">0</div></div>
+  </div>
+  <div class="feed rv" id="feedBox"><div class="empty">No dips yet. He's waiting.</div></div>
+</div></section>
+
+<footer class="foot">
+  <img src="assets/banner.jpg" alt="">
+  <div class="wrap fb">
+    <span>$BOTTOM on Solana · not financial advice · he just sits there</span>
+    <span id="botMode"></span>
+  </div>
+</footer>
+
+<script>
+const $ = (id) => document.getElementById(id);
+const fmt = (n, d = 2) => Number(n).toLocaleString("en-US", { maximumFractionDigits: d, minimumFractionDigits: 0 });
+const short = (n) => n >= 1e9 ? fmt(n / 1e9, 2) + "B" : n >= 1e6 ? fmt(n / 1e6, 2) + "M" : n >= 1e3 ? fmt(n / 1e3, 1) + "K" : fmt(n, 0);
+
+// nav background on scroll
+addEventListener("scroll", () => $("nav").classList.toggle("s", scrollY > 30), { passive: true });
+
+// reveal on scroll, staggered
+const io = new IntersectionObserver((es) => es.forEach((e) => {
+  if (e.isIntersecting) { e.target.classList.add("in"); io.unobserve(e.target); }
+}), { threshold: .15 });
+document.querySelectorAll(".rv").forEach((el, i) => { el.style.transitionDelay = (i % 4) * 90 + "ms"; io.observe(el); });
+
+// sound toggle
+$("snd").onclick = () => { const v = $("vid"); v.muted = !v.muted; if (!v.muted) { v.currentTime = 0; v.play(); } $("snd").textContent = v.muted ? "Sound on" : "Sound off"; };
+
+// copy CA
+$("copy").onclick = async () => {
+  const t = $("ca").textContent; if (!t || t.includes("soon")) return;
+  try { await navigator.clipboard.writeText(t); $("copy").textContent = "Copied"; setTimeout(() => $("copy").textContent = "Copy", 1400); } catch {}
+};
+
+// count-up numbers
+function countTo(el, to, f) {
+  const from = Number(el.dataset.v || 0); el.dataset.v = to; const t0 = performance.now();
+  const step = (t) => { const k = Math.min(1, (t - t0) / 1100), e = 1 - Math.pow(1 - k, 3); el.textContent = f(from + (to - from) * e); if (k < 1) requestAnimationFrame(step); };
+  requestAnimationFrame(step);
+}
+
+let tiersDrawn = false;
+function drawTiers(tiers) {
+  if (tiersDrawn) return; tiersDrawn = true;
+  const max = tiers[tiers.length - 1].drop;
+  $("tierBox").innerHTML = tiers.map((t) =>
+    `<div class="tier"><div class="lvl" style="height:${Math.round(t.share)}%"></div><div style="position:relative"><div class="d">−${t.drop}%</div><div class="p">${t.share}% of fees<small>BTC down ${t.drop}% in 1h</small></div></div></div>`).join("");
+  // meter ticks
+  const scale = max * 1.4;
+  $("meter").insertAdjacentHTML("beforeend", tiers.map((t) => `<div class="tk" data-d="${t.drop}" style="left:${100 - (t.drop / scale) * 100}%">−${t.drop}%</div>`).join(""));
+  $("meter").dataset.scale = scale;
+}
+
+function render(s) {
+  const c = s.config || {};
+  if (c.mint) $("ca").textContent = c.mint;
+  const pump = c.pump || (c.mint ? "https://pump.fun/coin/" + c.mint : "#");
+  $("buyLink").href = $("buyLink2").href = pump;
+  if (c.x) $("xLink").href = c.x;
+  const tiers = (s.tiers && s.tiers.length) ? s.tiers : [{ drop: 1, share: 25 }, { drop: 3, share: 50 }, { drop: 5, share: 100 }];
+  drawTiers(tiers);
+
+  const m = s.market;
+  if (m) {
+    const ch = m.ch1h, el = $("ch1h");
+    el.textContent = (ch > 0 ? "+" : ch < 0 ? "−" : "") + fmt(Math.abs(ch), 2) + "%";
+    el.className = "big " + (ch < 0 ? "r" : "g");
+    let hit = null; for (const t of tiers) if (-ch >= t.drop) hit = t;
+    $("mood").textContent = hit ? `Market is bleeding. Buyback armed: ${hit.share}% of fees.` : ch < 0 ? `Red, but not enough. He's sipping tea.` : `Market is fine. He's waiting.`;
+    $("heroKick").textContent = hit ? "market is bleeding — buying" : "watching the market";
+    $("heroDot").className = "dot" + (hit ? "" : " g");
+    const scale = Number($("meter").dataset.scale || 7);
+    $("fill").style.width = Math.max(0, Math.min(100, (-ch / scale) * 100)) + "%";
+    document.querySelectorAll(".tk").forEach((t) => t.classList.toggle("hit", -ch >= Number(t.dataset.d)));
+    $("px").textContent = "$" + fmt(m.price, 0);
+    $("ch24").textContent = (m.ch24h > 0 ? "+" : "") + fmt(m.ch24h, 2) + "%";
+    const sec = Math.round((Date.now() - (s.lastCheck || m.at)) / 1000);
+    $("ago").textContent = sec < 60 ? "just now" : Math.round(sec / 60) + " min ago";
+  }
+
+  const T = s.totals || {};
+  countTo($("tB"), T.buybacks || 0, (v) => fmt(v, 0));
+  countTo($("tS"), T.solSpent || 0, (v) => fmt(v, 2));
+  countTo($("tT"), T.tokensBurned || 0, (v) => short(v));
+
+  const ev = (s.events || []).filter((e) => e.spent || e.dry);
+  if (ev.length) {
+    $("feedBox").innerHTML = ev.slice(0, 12).map((e) => {
+      const when = new Date(e.at).toLocaleString("en-US", { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" });
+      const what = e.spent ? `Bought ${fmt(e.spent, 3)} SOL of $BOTTOM${e.burned ? `, burned ${short(e.burned)}` : ""}` : `Would buy with ${e.share}% of fees`;
+      const link = e.burnTx || e.buyTx;
+      return `<div class="fr"><span class="t">${when}</span><span class="dp">${fmt(e.ch1h, 2)}%</span><span>${what}${e.dry ? '<span class="sim">test</span>' : ""}</span>${link ? `<a href="https://solscan.io/tx/${link}" target="_blank" rel="noopener">tx</a>` : "<span></span>"}</div>`;
+    }).join("");
+  }
+  $("botMode").textContent = s.bot === "offline" ? "bot: offline" : s.dryRun ? "bot: test mode" : "bot: live";
+}
+
+async function load() {
+  try { const r = await fetch("/api/state", { cache: "no-store" }); if (r.ok) render(await r.json()); } catch (e) {}
+}
+load(); setInterval(load, 30000);
+</script>
+</body>
+</html>
