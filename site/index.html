@@ -43,12 +43,12 @@ nav .wrap{display:flex;align-items:center;justify-content:space-between;height:7
 
 /* hero */
 .hero{padding:130px 0 70px;position:relative}
-.hero .wrap{display:grid;grid-template-columns:1fr 1.25fr;gap:56px;align-items:center}
+.hero .wrap{display:grid;grid-template-columns:1fr 1.1fr;gap:56px;align-items:center}
 .kick{display:inline-flex;align-items:center;gap:10px;font-weight:600;font-size:14px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
 .dot{width:10px;height:10px;border-radius:50%;background:var(--red);box-shadow:0 0 0 0 rgba(226,28,31,.6);animation:pulse 1.6s infinite}
 .dot.g{background:var(--green);animation:none}
 @keyframes pulse{70%{box-shadow:0 0 0 10px rgba(226,28,31,0)}100%{box-shadow:0 0 0 0 rgba(226,28,31,0)}}
-h1{font:clamp(60px,8.4vw,116px)/.9 Archivo;letter-spacing:-.02em;margin:18px 0 22px}
+h1{font:clamp(52px,6vw,84px)/.9 Archivo;letter-spacing:-.02em;margin:18px 0 22px}
 h1 span{display:inline-block}
 .lead{font-size:22px;line-height:1.35;max-width:440px}
 .lead b{color:var(--red);font-weight:600}
@@ -122,6 +122,10 @@ h2{font:clamp(40px,5vw,64px)/.95 Archivo;letter-spacing:-.01em}
 .foot img{display:block;width:100%;height:auto;border-bottom:3px solid var(--ink)}
 .fb{display:flex;justify-content:space-between;align-items:center;padding:26px 0 40px;gap:20px;flex-wrap:wrap;color:var(--muted);font-size:14px}
 
+@media(max-width:1060px){
+ .hero .wrap{grid-template-columns:1fr}
+ h1{font-size:clamp(56px,11vw,96px)}
+}
 @media(max-width:900px){
  .hero .wrap,.mk{grid-template-columns:1fr}
  .how,.tiers,.stats{grid-template-columns:1fr}
